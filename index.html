@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GlowFit - Women's Health & IF Companion</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    
+    <!-- React 18 & ReactDOM UMD CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel Standalone CDN -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    
+    <style>
+      * {
+        font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      }
+      .scrollbar-none::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-none {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+</head>
+<body class="bg-slate-200/60 m-0 p-0 overflow-x-hidden">
+    <!-- React Mount Point -->
+    <div id="root"></div>
+
+    <!-- React Application Logic -->
+    <script type="text/babel">
+      const { useState, useEffect, useMemo } = React;
+
+      // --- INLINE SVG ICON COMPONENTS ---
+      const Play = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      );
+      const Pause = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+      );
+      const Flame = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"></path></svg>
+      );
+      const Droplets = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.29 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"></path><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3c.5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 0 1-11.2 5.6"></path></svg>
+      );
+      const Dumbbell = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M4 9v6M20 9v6M9 4v16M15 4v16"></path></svg>
+      );
+      const TrendingUp = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+      );
+      const Settings = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      );
+      const ChevronRight = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      );
+      const Plus = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      );
+      const Check = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      );
+      const Clock = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      );
+      const Award = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+      );
+      const Activity = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+      );
+      const Sparkles = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"></path></svg>
+      );
+      const X = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      );
+      const Bell = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      );
+      const Sun = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      );
+      const Moon = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      );
+      const Wifi = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13a10 10 0 0 1 14 0"></path><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 20 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+      );
+      const Signal = ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20h.01"></path><path d="M7 20v-4"></path><path d="M12 20v-8"></path><path d="M17 20v-12"></path><path d="M22 20V4"></path></svg>
+      );
+
+      // --- MAIN REACT COMPONENT ---
+      function App() {
+        // Theme Mode State (Day / Night Mode)
+        const [isDarkMode, setIsDarkMode] = useState(false);
+
+        // Navigation State
+        const [activeTab, setActiveTab] = useState('home');
+
+        // User Profile State
+        const [profile, setProfile] = useState({
+          name: 'คุณโอลิเวีย',
+          subtitle: 'Olivia Reed',
+          height: 163,
+          currentWeight: 52.5,
+          targetWeight: 49.0,
+          startWeight: 56.0,
+          age: 26,
+          streakDays: 12
+        });
+
+        // Fasting State (IF Timer)
+        const [fastingConfig, setFastingConfig] = useState({
+          protocol: '16:8',
+          fastingHours: 16,
+          eatingHours: 8
+        });
+        const [isFasting, setIsFasting] = useState(true);
+        const [fastingStartTime, setFastingStartTime] = useState(() => {
+          const d = new Date();
+          d.setHours(d.getHours() - 11);
+          return d.getTime();
+        });
+        const [fastingElapsedTime, setFastingElapsedTime] = useState(11 * 3600 + 32 * 60);
+
+        // Water Tracker State
+        const [waterIntake, setWaterIntake] = useState(1400);
+        const waterTarget = 2000;
+
+        // Weight History State
+        const [weightLogs, setWeightLogs] = useState([
+          { date: '1 ส.ค.', weight: 55.2 },
+          { date: '3 ส.ค.', weight: 54.8 },
+          { date: '5 ส.ค.', weight: 54.1 },
+          { date: '7 ส.ค.', weight: 53.5 },
+          { date: '9 ส.ค.', weight: 53.0 },
+          { date: 'วันนี้', weight: 52.5 }
+        ]);
+
+        // Modal State
+        const [showAddWeightModal, setShowAddWeightModal] = useState(false);
+        const [newWeightInput, setNewWeightInput] = useState('');
+
+        // Active Workout Player State
+        const [activeRoutine, setActiveRoutine] = useState(null);
+        const [workoutTimer, setWorkoutTimer] = useState({
+          exerciseIndex: 0,
+          phase: 'work',
+          secondsLeft: 30,
+          isPaused: false
+        });
+
+        // Home Filter Tag
+        const [homeFilter, setHomeFilter] = useState('ทั้งหมด');
+
+        // --- FASTING TIMER TICKER ---
+        useEffect(() => {
+          let interval = null;
+          if (isFasting) {
+            interval = setInterval(() => {
+              const now = Date.now();
+              const elapsed = Math.floor((now - fastingStartTime) / 1000);
+              setFastingElapsedTime(elapsed);
+            }, 1000);
+          }
+          return () => clearInterval(interval);
+        }, [isFasting, fastingStartTime]);
+
+        // Fasting Calculations
+        const targetSeconds = fastingConfig.fastingHours * 3600;
+        const fastingProgressPercent = Math.min(
+          100,
+          Math.round((fastingElapsedTime / targetSeconds) * 100)
+        );
+
+        const formatSecondsToHMS = (totalSec) => {
+          const h = Math.floor(totalSec / 3600);
+          const m = Math.floor((totalSec % 3600) / 60);
+          const s = totalSec % 60;
+          return `${h.toString().padStart(2, '0')}:${m
+            .toString()
+            .padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        };
+
+        const remainingFastingSeconds = Math.max(0, targetSeconds - fastingElapsedTime);
+
+        // Fasting Phase Information
+        const getFastingPhase = (hours) => {
+          if (hours < 4) return { name: 'สภาวะปกติ (Anabolic)', color: isDarkMode ? 'text-amber-400' : 'text-amber-600', desc: 'ระดับน้ำตาลและอินซูลินค่อยๆ ลดลง' };
+          if (hours < 8) return { name: 'ลดอินซูลิน (Insulin Drop)', color: isDarkMode ? 'text-sky-400' : 'text-sky-600', desc: 'กระเพาะอาหารย่อยหมด ร่างกายเริ่มดึงพลังงานสะสม' };
+          if (hours < 12) return { name: 'เริ่มเผาผลาญไขมัน (Fat Burn)', color: isDarkMode ? 'text-rose-400' : 'text-pink-600', desc: 'ร่างกายเริ่มนำไขมันสะสมมาใช้เป็นพลังงานหลัก' };
+          if (hours < 16) return { name: 'เข้าสู่ Ketosis (Ketosis Zone)', color: isDarkMode ? 'text-purple-400' : 'text-purple-600', desc: 'การเผาผลาญไขมันอยู่ในระดับสูงสุด สมาธิดีขึ้น' };
+          return { name: 'การกลืนกินตัวเองของเซลล์ (Autophagy)', color: isDarkMode ? 'text-emerald-400' : 'text-emerald-600', desc: 'เซลล์เริ่มซ่อมแซมตัวเอง รีไซเคิลส่วนที่สึกหรอ' };
+        };
+
+        const currentPhase = getFastingPhase(fastingElapsedTime / 3600);
+
+        // BMI & BMR Calculations
+        const bmi = useMemo(() => {
+          const hInMeters = profile.height / 100;
+          return (profile.currentWeight / (hInMeters * hInMeters)).toFixed(1);
+        }, [profile.height, profile.currentWeight]);
+
+        const bmr = useMemo(() => {
+          return Math.round(
+            10 * profile.currentWeight + 6.25 * profile.height - 5 * profile.age - 161
+          );
+        }, [profile]);
+
+        const getBMICategory = (val) => {
+          const numericBmi = parseFloat(val);
+          if (numericBmi < 18.5) return { text: 'น้ำหนักน้อย / ผอม', color: 'text-amber-500', bg: isDarkMode ? 'bg-amber-950/60 border border-amber-800/50' : 'bg-amber-50' };
+          if (numericBmi < 23) return { text: 'สมส่วน / สุขภาพดี', color: 'text-emerald-500', bg: isDarkMode ? 'bg-emerald-950/60 border border-emerald-800/50' : 'bg-emerald-50' };
+          if (numericBmi < 25) return { text: 'น้ำหนักเกินเกณฑ์', color: 'text-orange-500', bg: isDarkMode ? 'bg-orange-950/60 border border-orange-800/50' : 'bg-orange-50' };
+          return { text: 'เริ่มมีภาวะอ้วน', color: 'text-rose-500', bg: isDarkMode ? 'bg-rose-950/60 border border-rose-800/50' : 'bg-rose-50' };
+        };
+
+        // Workout Library Data
+        const workoutRoutines = [
+          {
+            id: 'abs-core',
+            title: 'หน้าท้องแบนราบ กระชับเอว S',
+            subtitle: 'Flat Stomach & Tiny Waist',
+            duration: '12 นาที',
+            calories: '95 kcal',
+            level: 'เริ่มต้น - ปานกลาง',
+            category: 'หน้าท้อง',
+            image: '🧘‍♀️',
+            accent: 'from-pink-200 via-rose-100 to-amber-100',
+            darkAccent: 'from-pink-900/40 to-purple-900/40',
+            tagColor: isDarkMode ? 'bg-pink-900/50 text-pink-300' : 'bg-pink-100 text-pink-700',
+            exercises: [
+              { name: 'Plank Hold', work: 30, rest: 15, desc: 'เกร็งหน้าท้อง ลำตัวตรงเป็นเส้นเดียว' },
+              { name: 'Russian Twists', work: 45, rest: 15, desc: 'บิดลำตัวซ้าย-ขวา ช้าๆ เกร็งหน้าท้องด้านข้าง' },
+              { name: 'Bicycle Crunches', work: 40, rest: 15, desc: 'ดึงเข่าสลับแตะข้อศอกตรงข้าม' },
+              { name: 'Leg Raises', work: 35, rest: 15, desc: 'นอนยกขากระดกขึ้น-ลง ห้ามหลังลอย' }
+            ]
+          },
+          {
+            id: 'booty-thighs',
+            title: 'ปั้นสะโพกสวย ต้นขากระชับ',
+            subtitle: 'Glute Lift & Slim Thighs',
+            duration: '15 นาที',
+            calories: '130 kcal',
+            level: 'ปานกลาง',
+            category: 'สะโพก & ขา',
+            image: '🍑',
+            accent: 'from-purple-200 via-fuchsia-100 to-pink-100',
+            darkAccent: 'from-purple-900/40 to-fuchsia-900/40',
+            tagColor: isDarkMode ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700',
+            exercises: [
+              { name: 'Sumo Squats', work: 45, rest: 15, desc: 'กางขาแนวกว้าง ย่อตัวลงเน้นก้นและต้นขาด้านใน' },
+              { name: 'Donkey Kicks (Left)', work: 40, rest: 10, desc: 'ถีบขาซ้ายขึ้นด้านบน เกร็งก้นบนสุด' },
+              { name: 'Donkey Kicks (Right)', work: 40, rest: 10, desc: 'ถีบขาขวาขึ้นด้านบน เกร็งก้นบนสุด' },
+              { name: 'Glute Bridges', work: 45, rest: 15, desc: 'นอนยกสะโพกขึ้น เกร็งก้นค้างไว้ 1 วินาที' }
+            ]
+          },
+          {
+            id: 'full-body-burn',
+            title: 'เบิร์นไขมันทั้งเรือนร่าง Low Impact',
+            subtitle: 'Full Body Sweaty Cardio',
+            duration: '18 นาที',
+            calories: '160 kcal',
+            level: 'ทุกระดับ',
+            category: 'คาดิโอ',
+            image: '✨',
+            accent: 'from-teal-100 via-emerald-100 to-cyan-100',
+            darkAccent: 'from-teal-900/40 to-emerald-900/40',
+            tagColor: isDarkMode ? 'bg-teal-900/50 text-teal-300' : 'bg-teal-100 text-teal-700',
+            exercises: [
+              { name: 'Jumping Jacks (Low Impact)', work: 45, rest: 15, desc: 'ก้าวแตะข้างสลับยกแขน ไร้แรงกระแทก' },
+              { name: 'High Knees Step', work: 45, rest: 15, desc: 'ยกเข่าสูงสลับซ้าย-ขวา เกร็งหน้าท้อง' },
+              { name: 'Skaters', work: 40, rest: 15, desc: 'ก้าวสไลด์ซ้ายขวาเพิ่มการเผาผลาญ' },
+              { name: 'Wall Push-ups', work: 40, rest: 15, desc: 'ดันพื้นกับกำแพง กระชับต้นแขนและหน้าอก' }
+            ]
+          }
+        ];
+
+        // --- WORKOUT TIMER TICKER ---
+        useEffect(() => {
+          let timer = null;
+          if (activeRoutine && !workoutTimer.isPaused && workoutTimer.phase !== 'finished') {
+            timer = setInterval(() => {
+              setWorkoutTimer((prev) => {
+                if (prev.secondsLeft > 1) {
+                  return { ...prev, secondsLeft: prev.secondsLeft - 1 };
+                }
+
+                const currentEx = activeRoutine.exercises[prev.exerciseIndex];
+                if (prev.phase === 'work') {
+                  return {
+                    ...prev,
+                    phase: 'rest',
+                    secondsLeft: currentEx.rest
+                  };
+                } else {
+                  if (prev.exerciseIndex + 1 < activeRoutine.exercises.length) {
+                    const nextEx = activeRoutine.exercises[prev.exerciseIndex + 1];
+                    return {
+                      exerciseIndex: prev.exerciseIndex + 1,
+                      phase: 'work',
+                      secondsLeft: nextEx.work,
+                      isPaused: false
+                    };
+                  } else {
+                    return { ...prev, phase: 'finished', secondsLeft: 0 };
+                  }
+                }
+              });
+            }, 1000);
+          }
+          return () => clearInterval(timer);
+        }, [activeRoutine, workoutTimer.isPaused, workoutTimer.phase]);
+
+        const handleToggleFasting = () => {
+          if (isFasting) {
+            if (window.confirm('คุณต้องการสิ้นสุดการอดอาหาร (Fasting) และเริ่มช่วงรับประทานอาหารใช่หรือไม่?')) {
+              setIsFasting(false);
+            }
+          } else {
+            setIsFasting(true);
+            setFastingStartTime(Date.now());
+            setFastingElapsedTime(0);
+          }
+        };
+
+        const handleAddWater = (amount) => {
+          setWaterIntake((prev) => Math.min(waterTarget + 1000, prev + amount));
+        };
+
+        const handleSaveWeight = () => {
+          const val = parseFloat(newWeightInput);
+          if (!isNaN(val) && val > 30 && val < 200) {
+            setProfile((prev) => ({ ...prev, currentWeight: val }));
+            const todayLabel = 'วันนี้';
+            setWeightLogs((prev) => {
+              const filtered = prev.filter((item) => item.date !== todayLabel);
+              return [...filtered, { date: todayLabel, weight: val }];
+            });
+            setShowAddWeightModal(false);
+            setNewWeightInput('');
+          }
+        };
+
+        const startWorkoutSession = (routine) => {
+          setActiveRoutine(routine);
+          setWorkoutTimer({
+            exerciseIndex: 0,
+            phase: 'work',
+            secondsLeft: routine.exercises[0].work,
+            isPaused: false
+          });
+        };
+
+        return (
+          <div className={`flex justify-center items-center min-h-screen p-0 sm:p-4 transition-colors duration-500 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-200/60 text-slate-800'}`}>
+            <div className={`w-full max-w-[412px] h-[100dvh] sm:h-[844px] sm:max-h-[92vh] sm:rounded-[48px] sm:border-[8px] sm:border-slate-800/90 sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col relative overflow-hidden transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-900' : 'bg-gradient-to-br from-pink-100/70 via-amber-50/50 to-purple-100/60'}`}>
+              
+              {/* Glow Orbs */}
+              <div className={`absolute top-[-100px] left-[-80px] w-72 h-72 rounded-full blur-3xl pointer-events-none transition-all ${isDarkMode ? 'bg-purple-600/15' : 'bg-pink-300/40'}`} />
+              <div className={`absolute top-[-50px] right-[-60px] w-72 h-72 rounded-full blur-3xl pointer-events-none transition-all ${isDarkMode ? 'bg-rose-600/15' : 'bg-amber-200/40'}`} />
+
+              {/* Status Bar */}
+              <div className="pt-2.5 px-6 flex items-center justify-between z-20 text-xs font-bold tracking-tight select-none">
+                <span className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>11:30</span>
+                <div className="w-24 h-4.5 bg-black rounded-full shadow-inner flex items-center justify-end px-1.5 gap-1">
+                  <span className="w-2 h-2 rounded-full bg-slate-800" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-950" />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Signal className={`w-3.5 h-3.5 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`} />
+                  <Wifi className={`w-3.5 h-3.5 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`} />
+                  <div className={`w-5 h-2.5 border rounded-sm p-0.5 flex items-center ${isDarkMode ? 'border-slate-300' : 'border-slate-700'}`}>
+                    <div className={`h-full w-full rounded-2px ${isDarkMode ? 'bg-slate-300' : 'bg-slate-700'}`} />
+                  </div>
+                </div>
+              </div>
+
+              {/* App Header */}
+              <header className="pt-3 px-5 pb-2 flex items-center justify-between z-20">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-11 h-11 rounded-full ring-2 ring-pink-300/80 p-0.5 bg-gradient-to-tr from-pink-300 via-rose-300 to-purple-300 shadow-md flex items-center justify-center overflow-hidden">
+                      <div className={`w-full h-full rounded-full flex items-center justify-center text-base font-bold ${isDarkMode ? 'bg-slate-900 text-pink-300' : 'bg-pink-50 text-pink-600'}`}>
+                        👩‍💼
+                      </div>
+                    </div>
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full"></span>
+                  </div>
+                  <div>
+                    <div className={`text-[11px] font-medium tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                      สวัสดีตอนเช้า ✨
+                    </div>
+                    <h1 className={`text-sm font-bold flex items-center gap-1.5 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                      {profile.name}
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-pink-100 to-rose-100 text-pink-700 font-semibold border border-pink-200/60 shadow-sm">
+                        🔥 {profile.streakDays} วัน
+                      </span>
+                    </h1>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setIsDarkMode(!isDarkMode)} className={`w-9 h-9 rounded-full backdrop-blur-md shadow-sm border flex items-center justify-center transition-all active:scale-90 ${isDarkMode ? 'bg-slate-800/80 border-slate-700 text-amber-300 hover:bg-slate-800' : 'bg-white/90 border-pink-200/80 text-purple-600 hover:bg-white'}`}>
+                    {isDarkMode ? <Sun className="w-4 h-4 fill-amber-300/20" /> : <Moon className="w-4 h-4 fill-purple-500/20" />}
+                  </button>
+                  <button onClick={() => alert('ไม่มีการแจ้งเตือนใหม่ในขณะนี้')} className={`w-9 h-9 rounded-full backdrop-blur-md shadow-sm border flex items-center justify-center transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800' : 'bg-white/90 border-pink-200/80 text-slate-700 hover:bg-white'}`}>
+                    <Bell className="w-4 h-4" />
+                  </button>
+                </div>
+              </header>
+
+              {/* Main Tab Content */}
+              {activeTab === 'home' && (
+                <main className="flex-1 px-5 pt-1 pb-24 space-y-4 overflow-y-auto scrollbar-none z-10">
+                  <div>
+                    <h2 className={`text-xl font-black tracking-tight leading-snug ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                      มาร่วมสร้างวันใหม่ <br />
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-400 to-purple-500">
+                        ที่เปล่งประกายไปด้วยกัน ✨
+                      </span>
+                    </h2>
+                  </div>
+
+                  {/* Fasting Card */}
+                  <div className={`rounded-[28px] p-5 shadow-lg relative overflow-hidden transition-all border ${isDarkMode ? 'bg-slate-900/90 text-slate-100 border-purple-900/40 shadow-purple-950/30' : 'bg-gradient-to-br from-pink-100/90 via-rose-100/80 to-purple-100/90 text-slate-800 border-pink-200/80 shadow-pink-200/40'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1.5 rounded-xl border ${isDarkMode ? 'bg-slate-800/80 text-pink-400 border-slate-700/50' : 'bg-pink-200/60 text-pink-600 border-pink-300/50'}`}>
+                          <Clock className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <span className={`text-[10px] font-medium block ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>สถานะ IF วันนี้</span>
+                          <span className={`text-xs font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>สูตร {fastingConfig.protocol} ({fastingConfig.fastingHours} ชม.)</span>
+                        </div>
+                      </div>
+                      <button onClick={handleToggleFasting} className={`text-[11px] px-3 py-1 rounded-full font-semibold transition-all active:scale-95 shadow-sm ${isFasting ? isDarkMode ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 hover:bg-pink-500/30' : 'bg-pink-500 text-white hover:bg-pink-600 shadow-pink-200' : isDarkMode ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30' : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-100'}`}>
+                        {isFasting ? 'หยุด Fasting' : 'เริ่ม Fasting'}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-12 gap-3 items-center">
+                      <div className="col-span-6 flex flex-col items-center justify-center relative">
+                        <div className="relative w-28 h-28 flex items-center justify-center">
+                          <svg className="w-full h-full transform -rotate-90">
+                            <circle cx="56" cy="56" r="45" stroke="currentColor" strokeWidth="9" className={isDarkMode ? 'text-slate-800' : 'text-pink-200/60'} fill="transparent" />
+                            <circle cx="56" cy="56" r="45" stroke="currentColor" strokeWidth="9" strokeDasharray={282.7} strokeDashoffset={282.7 - (282.7 * fastingProgressPercent) / 100} strokeLinecap="round" className="text-pink-500 transition-all duration-1000 ease-out" fill="transparent" />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <span className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{fastingProgressPercent}%</span>
+                            <span className={`text-[9px] font-semibold ${isDarkMode ? 'text-pink-300/80' : 'text-pink-600'}`}>{isFasting ? 'ทำสำเร็จแล้ว' : 'ช่วงทานอาหาร'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col-span-6 space-y-2 pl-1">
+                        <div className={`p-2 rounded-2xl border flex items-center justify-between ${isDarkMode ? 'bg-slate-800/70 border-slate-700/50' : 'bg-white/80 backdrop-blur-md border-pink-200/60 shadow-sm'}`}>
+                          <div>
+                            <div className={`text-[9px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>ผ่านไปแล้ว</div>
+                            <div className={`text-xs font-bold tracking-wider font-mono ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{formatSecondsToHMS(fastingElapsedTime)}</div>
+                          </div>
+                          <Flame className="w-3.5 h-3.5 text-amber-500" />
+                        </div>
+
+                        <div className={`p-2 rounded-2xl border flex items-center justify-between ${isDarkMode ? 'bg-slate-800/70 border-slate-700/50' : 'bg-white/80 backdrop-blur-md border-pink-200/60 shadow-sm'}`}>
+                          <div>
+                            <div className={`text-[9px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>เวลาที่เหลือ</div>
+                            <div className={`text-xs font-bold tracking-wider font-mono ${isDarkMode ? 'text-pink-300' : 'text-pink-600'}`}>{formatSecondsToHMS(remainingFastingSeconds)}</div>
+                          </div>
+                          <Clock className="w-3.5 h-3.5 text-pink-500" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={`mt-3 pt-2.5 border-t flex items-center justify-between ${isDarkMode ? 'border-slate-800/80' : 'border-pink-200/80'}`}>
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                        <span className={`text-[11px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                          ระยะปัจจุบัน: <strong className={currentPhase.color}>{currentPhase.name}</strong>
+                        </span>
+                      </div>
+                      <ChevronRight className={`w-3.5 h-3.5 ${isDarkMode ? 'text-slate-500' : 'text-pink-400'}`} />
+                    </div>
+                  </div>
+
+                  {/* Daily Tasks */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>ภารกิจดูแลสุขภาพวันนี้</h3>
+                      <span className="text-[11px] text-pink-500 font-semibold cursor-pointer hover:underline">ดูทั้งหมด</span>
+                    </div>
+
+                    {/* Water Card */}
+                    <div className={`rounded-[24px] p-4 shadow-sm border transition-all ${isDarkMode ? 'bg-slate-900/80 backdrop-blur-md border-slate-800' : 'bg-white/90 backdrop-blur-md border-pink-100/80'}`}>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-inner ${isDarkMode ? 'bg-cyan-950/80 text-cyan-400 border border-cyan-800/40' : 'bg-cyan-50 text-cyan-500'}`}>
+                            <Droplets className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="text-[10px] font-semibold text-slate-400">ดื่มน้ำเปล่าบริสุทธิ์</div>
+                            <h4 className={`text-xs font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{waterIntake} / {waterTarget} ml</h4>
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-cyan-900/50 text-cyan-300 border border-cyan-800/50' : 'bg-cyan-100/70 text-cyan-700'}`}>
+                          {Math.round((waterIntake / waterTarget) * 100)}%
+                        </span>
+                      </div>
+
+                      <div className={`w-full rounded-full h-2.5 overflow-hidden p-0.5 mb-2.5 border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200/50'}`}>
+                        <div className="bg-gradient-to-r from-cyan-400 to-sky-400 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (waterIntake / waterTarget) * 100)}%` }} />
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2">
+                        <button onClick={() => handleAddWater(250)} className={`flex-1 py-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1 active:scale-95 ${isDarkMode ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-cyan-300' : 'bg-pink-50/50 border-pink-100 text-slate-700 hover:text-cyan-700'}`}>
+                          <Plus className="w-3 h-3" /> 250 ml (1 แก้ว)
+                        </button>
+                        <button onClick={() => handleAddWater(500)} className={`flex-1 py-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center gap-1 active:scale-95 ${isDarkMode ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-cyan-300' : 'bg-pink-50/50 border-pink-100 text-slate-700 hover:text-cyan-700'}`}>
+                          <Plus className="w-3 h-3" /> 500 ml (1 ขวด)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Workout Card */}
+                    <div className={`rounded-[24px] p-4 shadow-sm border transition-all ${isDarkMode ? 'bg-slate-900/80 backdrop-blur-md border-slate-800' : 'bg-white/90 backdrop-blur-md border-pink-100/80'}`}>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-inner ${isDarkMode ? 'bg-rose-950/80 text-rose-400 border border-rose-800/40' : 'bg-rose-50 text-rose-500'}`}>
+                            <Dumbbell className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-rose-900/60 text-rose-300' : 'bg-pink-100 text-pink-700'}`}>แนะนําสําหรับคุณ</span>
+                            <h4 className={`text-xs font-bold mt-0.5 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{workoutRoutines[0].title}</h4>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] font-semibold text-slate-400 block">{workoutRoutines[0].duration}</span>
+                          <span className="text-[10px] font-bold text-amber-500">{workoutRoutines[0].calories}</span>
+                        </div>
+                      </div>
+                      <button onClick={() => startWorkoutSession(workoutRoutines[0])} className="w-full py-2 rounded-xl bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 text-white text-xs font-bold shadow-md shadow-pink-300/30 hover:opacity-95 transition-all flex items-center justify-center gap-1.5 active:scale-95">
+                        <Play className="w-3.5 h-3.5 fill-current" /> เริ่มต้นออกกำลังกายเลย
+                      </button>
+                    </div>
+
+                    {/* Weight Card Banner */}
+                    <div className="bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 rounded-[24px] p-4 text-white shadow-md shadow-pink-200/40 flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <div className="text-[10px] text-pink-100 font-medium">น้ำหนักปัจจุบันของคุณ</div>
+                        <div className="text-xl font-black tracking-tight">{profile.currentWeight} <span className="text-xs font-normal text-pink-100">kg</span></div>
+                      </div>
+                      <button onClick={() => setShowAddWeightModal(true)} className="px-3.5 py-2 rounded-xl bg-white text-pink-600 text-[11px] font-bold shadow hover:bg-pink-50 transition-all active:scale-95">
+                        ชั่งน้ำหนักวันนี้
+                      </button>
+                    </div>
+                  </div>
+                </main>
+              )}
+
+              {/* Workout Tab */}
+              {activeTab === 'workout' && (
+                <main className="flex-1 px-5 pt-1 pb-24 space-y-4 overflow-y-auto scrollbar-none z-10">
+                  <div>
+                    <h2 className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>ตารางฝึก & ท่าออกกำลังกาย</h2>
+                    <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>ออกแบบเฉพาะสรีระผู้หญิง เน้นกระชับสัดส่วน ไร้แรงกระแทก</p>
+                  </div>
+                  <div className="space-y-3.5">
+                    {workoutRoutines.map((routine) => (
+                      <div key={routine.id} className={`rounded-[26px] p-4 border shadow-sm transition-all space-y-3 ${isDarkMode ? 'bg-slate-900/80 backdrop-blur-md border-slate-800' : 'bg-white/90 backdrop-blur-md border-pink-100/80 hover:shadow-md'}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${isDarkMode ? routine.darkAccent : routine.accent} flex items-center justify-center text-xl shadow-inner border border-white/20`}>
+                              {routine.image}
+                            </div>
+                            <div>
+                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${routine.tagColor}`}>{routine.category}</span>
+                              <h3 className={`text-sm font-bold mt-0.5 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{routine.title}</h3>
+                              <p className="text-[10px] text-slate-400">{routine.subtitle}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={`flex items-center justify-between text-[11px] p-2.5 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700/60 text-slate-300' : 'bg-pink-50/50 border-pink-100 text-slate-500'}`}>
+                          <span className="flex items-center gap-1 font-medium"><Clock className="w-3 h-3 text-slate-400" />{routine.duration}</span>
+                          <span className="flex items-center gap-1 font-medium"><Flame className="w-3 h-3 text-amber-500" />{routine.calories}</span>
+                          <span className="flex items-center gap-1 font-medium text-purple-500"><Award className="w-3 h-3" />{routine.level}</span>
+                        </div>
+
+                        <button onClick={() => startWorkoutSession(routine)} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-pink-400 to-purple-400 text-white text-xs font-bold hover:opacity-95 transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95">
+                          <Play className="w-3.5 h-3.5 fill-current" /> เริ่มโปรแกรมนี้
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </main>
+              )}
+
+              {/* Progress Tab */}
+              {activeTab === 'progress' && (
+                <main className="flex-1 px-5 pt-1 pb-24 space-y-4 overflow-y-auto scrollbar-none z-10">
+                  <div>
+                    <h2 className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>สถิติ & สุขภาพร่างกาย</h2>
+                    <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>ติดตามพัฒนาการอย่างเป็นธรรมชาติ ไม่กดดันตัวเอง</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className={`rounded-[24px] p-3.5 shadow-sm border space-y-1.5 ${isDarkMode ? 'bg-slate-900/80 backdrop-blur-md border-slate-800' : 'bg-white/90 backdrop-blur-md border-pink-100/80'}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400">ค่า BMI</span>
+                        <Activity className="w-3.5 h-3.5 text-purple-400" />
+                      </div>
+                      <div className={`text-xl font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{bmi}</div>
+                      <div className={`text-[9px] font-bold px-2 py-0.5 rounded-full inline-block ${getBMICategory(bmi).bg} ${getBMICategory(bmi).color}`}>
+                        {getBMICategory(bmi).text}
+                      </div>
+                    </div>
+
+                    <div className={`rounded-[24px] p-3.5 shadow-sm border space-y-1.5 ${isDarkMode ? 'bg-slate-900/80 backdrop-blur-md border-slate-800' : 'bg-white/90 backdrop-blur-md border-pink-100/80'}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400">พลังงาน BMR</span>
+                        <Flame className="w-3.5 h-3.5 text-rose-400" />
+                      </div>
+                      <div className={`text-xl font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{bmr} <span className="text-[10px] font-medium text-slate-400">kcal</span></div>
+                      <p className="text-[9px] text-slate-400">ขั้นต่ำต่อวัน</p>
+                    </div>
+                  </div>
+
+                  <div className={`rounded-[26px] p-4 shadow-sm border space-y-3 ${isDarkMode ? 'bg-slate-900/80 backdrop-blur-md border-slate-800' : 'bg-white/90 backdrop-blur-md border-pink-100/80'}`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>แนวโน้มน้ำหนักตัว</h3>
+                        <span className="text-[10px] text-emerald-500 font-semibold">↓ ลดลง 2.7 kg ในช่วง 2 สัปดาห์</span>
+                      </div>
+                      <button onClick={() => setShowAddWeightModal(true)} className={`p-1.5 rounded-xl transition-all active:scale-95 ${isDarkMode ? 'bg-purple-950/80 text-purple-300 hover:bg-purple-900' : 'bg-pink-50 text-pink-600 hover:bg-pink-100'}`}>
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="h-36 w-full pt-2 relative">
+                      <svg className="w-full h-full overflow-visible" viewBox="0 0 300 100">
+                        <line x1="0" y1="20" x2="300" y2="20" stroke={isDarkMode ? '#334155' : '#f1f5f9'} strokeDasharray="4" />
+                        <line x1="0" y1="50" x2="300" y2="50" stroke={isDarkMode ? '#334155' : '#f1f5f9'} strokeDasharray="4" />
+                        <line x1="0" y1="80" x2="300" y2="80" stroke={isDarkMode ? '#334155' : '#f1f5f9'} strokeDasharray="4" />
+                        <defs>
+                          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#f43f5e" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d="M 10 20 L 60 30 L 110 45 L 165 60 L 220 70 L 280 80 L 280 100 L 10 100 Z" fill="url(#chartGrad)" />
+                        <path d="M 10 20 L 60 30 L 110 45 L 165 60 L 220 70 L 280 80" fill="none" stroke="#f43f5e" strokeWidth="3.5" strokeLinecap="round" />
+                        {[{ x: 10, y: 20 }, { x: 60, y: 30 }, { x: 110, y: 45 }, { x: 165, y: 60 }, { x: 220, y: 70 }, { x: 280, y: 80 }].map((pt, i) => (
+                          <circle key={i} cx={pt.x} cy={pt.y} r="4" className="fill-white stroke-rose-500 stroke-[3]" />
+                        ))}
+                      </svg>
+                      <div className="flex justify-between text-[9px] text-slate-400 mt-1 px-1">
+                        {weightLogs.map((log, idx) => (<span key={idx}>{log.date}</span>))}
+                      </div>
+                    </div>
+                  </div>
+                </main>
+              )}
+
+              {/* Settings Tab */}
+              {activeTab === 'settings' && (
+                <main className="flex-1 px-5 pt-1 pb-24 space-y-4 overflow-y-auto scrollbar-none z-10">
+                  <div>
+                    <h2 className={`text-xl font-black tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>ตั้งค่าและโปรไฟล์</h2>
+                    <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>ปรับแต่งแผนสุขภาพให้เข้ากับไลฟ์สไตล์ของคุณ</p>
+                  </div>
+
+                  <div className={`rounded-[26px] p-4 shadow-sm border space-y-3 ${isDarkMode ? 'bg-slate-900/80 backdrop-blur-md border-slate-800' : 'bg-white/90 backdrop-blur-md border-pink-100/80'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-300 via-rose-300 to-purple-300 p-0.5 flex items-center justify-center text-xl shadow-sm">👩‍💼</div>
+                      <div>
+                        <h3 className={`text-base font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{profile.name}</h3>
+                        <p className="text-[11px] text-slate-400">{profile.subtitle}</p>
+                        <span className={`inline-block mt-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full border ${isDarkMode ? 'bg-pink-950/60 text-pink-300 border-pink-800/40' : 'bg-pink-50 text-pink-600 border-pink-100'}`}>
+                          สมาชิก GlowFit Premium ✨
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={`grid grid-cols-3 gap-2 pt-2 border-t text-center ${isDarkMode ? 'border-slate-800' : 'border-pink-50'}`}>
+                      <div className={`p-2 rounded-xl ${isDarkMode ? 'bg-slate-800/60' : 'bg-pink-50/50'}`}>
+                        <span className="text-[9px] text-slate-400 block">ส่วนสูง</span>
+                        <strong className={`text-xs ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{profile.height} cm</strong>
+                      </div>
+                      <div className={`p-2 rounded-xl ${isDarkMode ? 'bg-slate-800/60' : 'bg-pink-50/50'}`}>
+                        <span className="text-[9px] text-slate-400 block">น้ำหนักตั้งต้น</span>
+                        <strong className={`text-xs ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{profile.startWeight} kg</strong>
+                      </div>
+                      <div className={`p-2 rounded-xl ${isDarkMode ? 'bg-slate-800/60' : 'bg-pink-50/50'}`}>
+                        <span className="text-[9px] text-slate-400 block">เป้าหมาย</span>
+                        <strong className="text-xs text-pink-500">{profile.targetWeight} kg</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={`rounded-[26px] p-4 shadow-sm border space-y-2.5 ${isDarkMode ? 'bg-slate-900/80 backdrop-blur-md border-slate-800' : 'bg-white/90 backdrop-blur-md border-pink-100/80'}`}>
+                    <h3 className={`text-xs font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>เลือกรูปแบบการทำ Intermittent Fasting</h3>
+                    {[
+                      { name: '14:10', fast: 14, eat: 10, desc: 'เหมาะสำหรับผู้เริ่มต้น ปรับตัวง่าย' },
+                      { name: '16:8', fast: 16, eat: 8, desc: 'สูตรยอดนิยมสูงสุด เผาผลาญไขมันดีเยี่ยม' },
+                      { name: '18:6', fast: 18, eat: 6, desc: 'สำหรับผู้ทำเป็นประจำ เข้มข้นขึ้น' },
+                      { name: '20:4', fast: 20, eat: 4, desc: 'Warrior Diet การกลืนกินตัวเองของเซลล์สูง' }
+                    ].map((proto) => (
+                      <div key={proto.name} onClick={() => setFastingConfig({ protocol: proto.name, fastingHours: proto.fast, eatingHours: proto.eat })} className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${fastingConfig.protocol === proto.name ? isDarkMode ? 'border-pink-500 bg-pink-950/30' : 'border-pink-300 bg-pink-50/60 shadow-sm' : isDarkMode ? 'border-slate-800 hover:bg-slate-800/40' : 'border-slate-100 hover:bg-pink-50/30'}`}>
+                        <div>
+                          <div className={`text-xs font-bold flex items-center gap-1.5 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                            สูตร {proto.name}
+                            {fastingConfig.protocol === proto.name && (
+                              <span className="text-[9px] bg-gradient-to-r from-pink-400 to-rose-400 text-white px-1.5 py-0.2 rounded-full">ใช้งานอยู่</span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">{proto.desc}</div>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${fastingConfig.protocol === proto.name ? 'border-pink-500 bg-pink-500 text-white' : isDarkMode ? 'border-slate-700' : 'border-slate-300'}`}>
+                          {fastingConfig.protocol === proto.name && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </main>
+              )}
+
+              {/* Workout Modal Overlay */}
+              {activeRoutine && (
+                <div className="absolute inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-5 animate-in fade-in duration-300">
+                  <div className="flex items-center justify-between pt-6">
+                    <button onClick={() => setActiveRoutine(null)} className="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                      <X className="w-4 h-4" />
+                    </button>
+                    <div className="text-center">
+                      <span className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">กำลังออกกำลังกาย</span>
+                      <h3 className="text-xs font-bold text-slate-200">{activeRoutine.title}</h3>
+                    </div>
+                    <div className="w-9" />
+                  </div>
+
+                  {workoutTimer.phase !== 'finished' ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center my-4 space-y-5">
+                      <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 w-full max-w-xs space-y-1">
+                        <span className="text-[10px] text-slate-400">ท่าที่ {workoutTimer.exerciseIndex + 1} จาก {activeRoutine.exercises.length}</span>
+                        <h2 className="text-lg font-extrabold text-pink-300">{activeRoutine.exercises[workoutTimer.exerciseIndex].name}</h2>
+                        <p className="text-[11px] text-slate-400">{activeRoutine.exercises[workoutTimer.exerciseIndex].desc}</p>
+                      </div>
+
+                      <div className="relative w-44 h-44 flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle cx="88" cy="88" r="74" stroke="currentColor" strokeWidth="10" className="text-slate-900" fill="transparent" />
+                          <circle cx="88" cy="88" r="74" stroke="currentColor" strokeWidth="10" strokeDasharray={464.9} strokeDashoffset={464.9 - (464.9 * workoutTimer.secondsLeft) / (workoutTimer.phase === 'work' ? activeRoutine.exercises[workoutTimer.exerciseIndex].work : activeRoutine.exercises[workoutTimer.exerciseIndex].rest)} strokeLinecap="round" className={`transition-all duration-1000 ${workoutTimer.phase === 'work' ? 'text-pink-400' : 'text-amber-400'}`} fill="transparent" />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">{workoutTimer.phase === 'work' ? 'ลุยเลย!' : 'พักผ่อนก่อน'}</span>
+                          <span className="text-4xl font-black font-mono my-0.5 tracking-tight">{workoutTimer.secondsLeft}s</span>
+                          <span className="text-[10px] text-slate-400">วินาที</span>
+                        </div>
+                      </div>
+
+                      {workoutTimer.exerciseIndex + 1 < activeRoutine.exercises.length && (
+                        <div className="text-[11px] text-slate-400">ท่าถัดไป: <strong className="text-slate-200">{activeRoutine.exercises[workoutTimer.exerciseIndex + 1].name}</strong></div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3">
+                      <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl mb-1 animate-bounce">🎉</div>
+                      <h2 className="text-xl font-black text-white">สุดยอดมากค่ะ! ยินดีด้วย 🎉</h2>
+                      <p className="text-xs text-slate-400 max-w-xs">คุณออกกำลังกายครบตามเป้าหมายของเซสชั่นนี้แล้ว ร่างกายของคุณแข็งแรงและสวยงามขึ้นอีกขั้น!</p>
+                      <button onClick={() => setActiveRoutine(null)} className="px-6 py-2.5 rounded-full bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-xs shadow-lg">
+                        กลับสู่หน้าหลัก
+                      </button>
+                    </div>
+                  )}
+
+                  {workoutTimer.phase !== 'finished' && (
+                    <div className="flex items-center justify-center gap-6 pb-4">
+                      <button onClick={() => setWorkoutTimer((p) => ({ ...p, isPaused: !p.isPaused }))} className="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-400 to-rose-400 text-white flex items-center justify-center shadow-lg shadow-pink-500/30 active:scale-95 transition-all">
+                        {workoutTimer.isPaused ? <Play className="w-6 h-6 fill-current" /> : <Pause className="w-6 h-6 fill-current" />}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Weight Modal */}
+              {showAddWeightModal && (
+                <div className="absolute inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+                  <div className={`rounded-[28px] p-5 w-full max-w-[280px] shadow-2xl space-y-3 animate-in zoom-in-95 duration-200 border ${isDarkMode ? 'bg-slate-900 text-slate-100 border-slate-800' : 'bg-white text-slate-800 border-pink-100'}`}>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold">บันทึกน้ำหนักวันนี้</h3>
+                      <button onClick={() => setShowAddWeightModal(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-slate-400 font-medium block mb-1">น้ำหนักตัว (กิโลกรัม)</label>
+                      <input type="number" step="0.1" placeholder="เช่น 52.5" value={newWeightInput} onChange={(e) => setNewWeightInput(e.target.value)} className={`w-full px-3.5 py-2.5 rounded-xl font-bold text-base focus:outline-none focus:border-pink-400 border ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-pink-50/50 border-pink-100 text-slate-800'}`} />
+                    </div>
+
+                    <div className="flex gap-2 pt-1">
+                      <button onClick={() => setShowAddWeightModal(false)} className={`flex-1 py-2 rounded-xl text-xs font-bold ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>ยกเลิก</button>
+                      <button onClick={handleSaveWeight} className="flex-1 py-2 rounded-xl bg-gradient-to-r from-pink-400 to-rose-400 text-white text-xs font-bold hover:opacity-95 shadow-md">บันทึกข้อมูล</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom Nav */}
+              <nav className={`absolute bottom-0 inset-x-0 border-t px-4 py-2.5 flex items-center justify-between z-30 shadow-lg transition-colors duration-500 ${isDarkMode ? 'bg-slate-950/90 backdrop-blur-lg border-slate-800/80' : 'bg-white/95 backdrop-blur-lg border-pink-100/80'}`}>
+                {[
+                  { id: 'home', label: 'หน้าหลัก', icon: Clock },
+                  { id: 'workout', label: 'ออกกำลังกาย', icon: Dumbbell },
+                  { id: 'progress', label: 'สถิติ', icon: TrendingUp },
+                  { id: 'settings', label: 'ตั้งค่า', icon: Settings }
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-1.5 transition-all duration-300 active:scale-95 ${isActive ? 'bg-slate-900 text-white px-3.5 py-2 rounded-full shadow-md' : 'text-slate-400 hover:text-slate-600 p-1.5'}`}>
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-pink-400' : ''}`} />
+                      {isActive && <span className="text-[11px] font-bold whitespace-nowrap">{tab.label}</span>}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-slate-300/40 rounded-full pointer-events-none z-40" />
+            </div>
+          </div>
+        );
+      }
+
+      // Render App
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+</body>
+</html>
+
